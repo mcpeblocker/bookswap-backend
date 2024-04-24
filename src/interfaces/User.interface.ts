@@ -6,4 +6,5 @@ export interface IUser {
   nickname: string;
   avatar: mongoose.Types.ObjectId | IFile;
   preferredGenres: string[];
+  onboarding: boolean;
 }

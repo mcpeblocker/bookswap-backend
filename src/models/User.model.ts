@@ -8,18 +8,20 @@ const userSchema = new mongoose.Schema<IUser>({
   },
   nickname: {
     type: String,
-    required: true,
     unique: true,
   },
   avatar: {
     type: mongoose.Schema.Types.ObjectId,
-    required: true,
   },
   preferredGenres: [
     {
       type: String,
     },
   ],
+  onboarding: {
+    type: Boolean,
+    required: true,
+  },
 });
 
 export default mongoose.model<IUser>("User", userSchema);
