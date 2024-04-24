@@ -9,3 +9,6 @@ The libraries to be used include:
  - mongoose
   
 The database to be used is MongoDB
+
+## Documentation
+You can find documentation for the API in this repository - [API Documentation folder](/docs)
