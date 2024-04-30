@@ -7,26 +7,16 @@ import {
   getUserByEmail,
   boardUser,
 } from "../services/users.service";
-import {
-  validateLogin,
-  validateBoardedUser,
-} from "../validators/auth.validator";
+import schemas from "../schemas";
 import { generateToken } from "../services/jwt.service";
+import { responser, validator } from "../utils/requests";
+import { AuthBoardDto, AuthLoginDto } from "../dto";
+import { ErrorCode } from "../enums/ErrorCode.enum";
 
 const router = express.Router();
 
-router.post("/login", async (req, res) => {
-  // Validate request data
-  const loginData = {
-    email: req.body.email,
-    token: req.body.token,
-  };
-  const validationResult = await validateLogin(loginData);
-  if (!validationResult.success) {
-    return res
-      .status(400)
-      .json({ message: validationResult.issues[0].message });
-  }
+router.post("/login", validator(schemas.auth.login), async (req, res) => {
+  const loginData = req.body as AuthLoginDto;
   // Verify google auth credentials
   // TODO: Implement Google auth verification
 
@@ -35,77 +25,59 @@ router.post("/login", async (req, res) => {
   if (!user) {
     // create user
     const newUser = await createBoardingUser(loginData.email);
-    return res.status(201).json({
-      data: {
-        userId: newUser._id,
-      },
-    });
+    if (!newUser) {
+      return res.status(500).json(responser.error([ErrorCode.SERVER_ERROR]));
+    }
+    return res
+      .status(201)
+      .json(responser.success({ boarding: true, userId: newUser._id }));
   }
   if (user.onboarding) {
-    return res.status(201).json({
-      data: {
-        userId: user._id,
-      },
-    });
+    return res
+      .status(201)
+      .json(responser.success({ boarding: true, userId: user._id }));
   }
   // generate jwt token
   const token = generateToken({
     userId: user._id,
   });
-  return res.status(200).json({
-    data: {
-      userId: user._id,
-      token,
-    },
-  });
+  return res.status(200).json(responser.success({ boarding: false, token }));
 });
 
-router.post("/board", upload.single("avatar"), async (req, res) => {
-  // Validate request data
-  if (!req.file) {
-    return res.status(400).send({
-      message: "No file uploaded",
+router.post(
+  "/board",
+  upload.single("avatar"),
+  validator(schemas.auth.board),
+  async (req, res) => {
+    let userData = {
+      ...req.body,
+      preferredGenres: req.body.preferredGenres.split(","),
+    } as AuthBoardDto;
+    // Validate request file
+    if (!req.file) {
+      return res.status(400).send(responser.error([ErrorCode.FILE_MISSING]));
+    }
+    const filename = await uploadToS3(req.file.originalname, req.file.buffer);
+    if (!filename) {
+      return res
+        .status(500)
+        .send(responser.error([ErrorCode.FILE_UPLOAD_ERROR]));
+    }
+    const file = await createFile({
+      filename,
     });
-  }
-  const userData = {
-    userId: req.body.userId,
-    email: req.body.email,
-    nickname: req.body.nickname,
-    preferredGenres: req.body.preferredGenres.split(","),
-  };
-  const validationResult = await validateBoardedUser(userData);
-  if (!validationResult.success) {
-    return res
-      .status(400)
-      .json({ message: validationResult.issues[0].message });
-  }
-  const filename = await uploadToS3(req.file.originalname, req.file.buffer);
-  if (!filename) {
-    return res.status(500).send({
-      message: "Error uploading file",
+    const user = await boardUser(req.body.userId, userData.email, {
+      ...userData,
+      avatar: file._id,
     });
-  }
-  const file = await createFile({
-    filename,
-  });
-  const user = await boardUser(req.body.userId, userData.email, {
-    ...userData,
-    avatar: file._id,
-  });
-  if (!user) {
-    return res.status(400).json({
-      message: "User not found",
-    });
-  }
-  const token = generateToken({
-    userId: user._id,
-  });
-  return res.status(200).json({
-    data: {
+    if (!user) {
+      return res.status(400).json(responser.error([ErrorCode.USER_NOT_FOUND]));
+    }
+    const token = generateToken({
       userId: user._id,
-      token,
-    },
-  });
-});
+    });
+    return res.status(200).json(responser.success({ token }));
+  }
+);
 
 export default router;

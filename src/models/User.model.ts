@@ -8,7 +8,6 @@ const userSchema = new mongoose.Schema<IUser>({
   },
   nickname: {
     type: String,
-    unique: true,
   },
   avatar: {
     type: mongoose.Schema.Types.ObjectId,
