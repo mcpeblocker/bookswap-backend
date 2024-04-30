@@ -5,6 +5,8 @@ It is designed to provide straightforward interface for the client instead of co
 
 ## API Groups
 ### - [Auth](auth)
+### - [Books](books)
+### - [Users](users)
 
 ## Shared Constants
 ### - [Error Codes](error-codes.md)

@@ -1,6 +1,8 @@
-# Login API Route
+# Login
+API Route
 
 ## Request - HTTP Request
+### Method: `POST`
 ### Headers
 - Content-Type: application/json
 ### Body
@@ -22,7 +24,7 @@
 ## Response - HTTP Response
 ### Headers
 - Content-Type: application/json
-### Body
+### Payload
 #### Structure
 - `success`
   - type: boolean

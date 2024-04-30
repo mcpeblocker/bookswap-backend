@@ -1,6 +1,8 @@
-# Board API Route
+# Board
+API Route
 
 ## Request - HTTP Request
+### Method: `POST`
 ### Headers
 - Content-Type: form-data
 ### Body
@@ -33,7 +35,7 @@ avatar          = File
 ## Response - HTTP Response
 ### Headers
 - Content-Type: application/json
-### Body
+### Payload
 #### Structure
 - `success`
   - type: boolean
