@@ -2,6 +2,10 @@ export enum ErrorCode {
   // Server
   SERVER_ERROR = "SERVER_ERROR",
 
+  // Authorization
+  UNAUTHORIZED = "UNAUTHORIZED",
+  FORBIDDEN = "FORBIDDEN",
+
   // Validation
   // [Auth] Login schema
   INVALID_EMAIL = "INVALID_EMAIL",

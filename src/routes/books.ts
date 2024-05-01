@@ -6,16 +6,27 @@ import schemas from "../schemas";
 import { responser, validator } from "../utils/requests";
 import { ErrorCode } from "../enums/ErrorCode.enum";
 import { EditBookDto, UploadBookDto } from "../dto";
-import { createBook, updateBook } from "../services/books.service";
+import {
+  createBook,
+  isOwnerOfBook,
+  updateBook,
+} from "../services/books.service";
 import mongoose from "mongoose";
+import { auth } from "../middlewares/auth";
+import { AuthRequest } from "../interfaces/AuthRequest.interface";
 
 const router = express.Router();
+
+router.use(auth);
 
 router.post(
   "/upload",
   upload.single("cover"),
   validator(schemas.books.upload),
-  async (req, res) => {
+  async (req: AuthRequest, res) => {
+    if (!req.userId) {
+      return res.status(401).send(responser.error([ErrorCode.UNAUTHORIZED]));
+    }
     let exceptionsList = [];
     if (req.body.exceptions) {
       exceptionsList = req.body.exceptions.split(",");
@@ -42,7 +53,7 @@ router.post(
     }
     const book = await createBook(
       { ...data, cover: file._id },
-      new mongoose.Types.ObjectId("60b4f0c4d9f7f8b7a0d3d1b4") // TODO: Replace with logged user id);
+      new mongoose.Types.ObjectId(req.userId)
     );
     if (!book) {
       return res.status(500).send(responser.error([ErrorCode.SERVER_ERROR]));
@@ -55,8 +66,19 @@ router.patch(
   "/:id/edit",
   upload.single("cover"),
   validator(schemas.books.edit),
-  async (req, res) => {
+  async (req: AuthRequest, res) => {
+    if (!req.userId) {
+      return res.status(401).send(responser.error([ErrorCode.UNAUTHORIZED]));
+    }
     const bookId = new mongoose.Types.ObjectId(req.params.id);
+    // Check if user is owner of the book
+    const isOwner = await isOwnerOfBook(
+      bookId,
+      new mongoose.Types.ObjectId(req.userId)
+    );
+    if (!isOwner) {
+      return res.status(403).send(responser.error([ErrorCode.FORBIDDEN]));
+    }
     let data = {
       ...req.body,
     } as EditBookDto;

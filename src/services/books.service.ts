@@ -24,6 +24,25 @@ export async function createBook(
   }
 }
 
+export async function isOwnerOfBook(
+  bookId: mongoose.Types.ObjectId,
+  userId: mongoose.Types.ObjectId
+) {
+  try {
+    const book = await db.models.Book.findOne({
+      _id: bookId,
+      owner: userId,
+    });
+    if (book) {
+      return true;
+    }
+    return false;
+  } catch (error) {
+    logger.silly("Error getting book", { error });
+    return null;
+  }
+}
+
 export async function updateBook(
   bookId: mongoose.Types.ObjectId,
   data: Partial<
