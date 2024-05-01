@@ -40,6 +40,47 @@ export async function createBoardingUser(email: string) {
   }
 }
 
-export function getUserByEmail(email: string) {
-  return db.models.User.findOne({ email });
+export async function getUserByEmail(email: string) {
+  try {
+    return await db.models.User.findOne({ email });
+  } catch (error) {
+    logger.silly("Error getting user by email", { error });
+    return null;
+  }
+}
+
+export async function searchUsersByNickname(nickname: string) {
+  try {
+    return await db.models.User.aggregate([
+      {
+        '$match': {
+          'nickname': {
+            '$regex': nickname, 
+            '$options': 'i'
+          }
+        }
+      }, {
+        '$lookup': {
+          'from': 'files', 
+          'localField': 'avatar', 
+          'foreignField': '_id', 
+          'as': 'avatar'
+        }
+      }, {
+        '$unwind': {
+          'path': '$avatar'
+        }
+      }, {
+        '$project': {
+          '_id': 0, 
+          'userId': '$_id', 
+          'nickname': 1, 
+          'avatar': '$avatar.filename'
+        }
+      }
+    ]);
+  } catch (error) {
+    logger.silly("Error searching users by nickname", { error });
+    return null;
+  }
 }

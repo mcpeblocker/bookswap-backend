@@ -2,6 +2,7 @@
 API Route
 
 ## Request - HTTP Request
+### Route: /books/upload
 ### Method: `POST`
 ### Headers
 - Content-Type: form-data

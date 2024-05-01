@@ -2,6 +2,7 @@
 API Route
 
 ## Request - HTTP Request
+### Route: /users/search?text=""
 ### Method: `GET`
 ### Query
 #### Properties

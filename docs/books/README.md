@@ -2,4 +2,4 @@
 
 ## Routes
 - [/books/upload](upload.md)
-- [/books/edit](edit.md)
+- [/books/:bookId/edit](edit.md)

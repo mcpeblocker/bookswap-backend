@@ -2,7 +2,8 @@
 API Route
 
 ## Request - HTTP Request
-### Method: `POST`
+### Route: /books/:bookId/edit
+### Method: `PATCH`
 ### Headers
 - Content-Type: form-data
 - Authorization: {token}

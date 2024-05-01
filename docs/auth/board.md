@@ -2,6 +2,7 @@
 API Route
 
 ## Request - HTTP Request
+### Route: /auth/board
 ### Method: `POST`
 ### Headers
 - Content-Type: form-data

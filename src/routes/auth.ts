@@ -66,6 +66,9 @@ router.post(
     const file = await createFile({
       filename,
     });
+    if (!file) {
+      return res.status(500).send(responser.error([ErrorCode.SERVER_ERROR]));
+    }
     const user = await boardUser(req.body.userId, userData.email, {
       ...userData,
       avatar: file._id,

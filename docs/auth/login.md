@@ -2,6 +2,7 @@
 API Route
 
 ## Request - HTTP Request
+### Route: /auth/login
 ### Method: `POST`
 ### Headers
 - Content-Type: application/json
