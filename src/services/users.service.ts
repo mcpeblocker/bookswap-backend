@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import { db } from "../core/database";
 import { IUser } from "../interfaces/User.interface";
 import logger from "../utils/logger";
@@ -53,34 +54,53 @@ export async function searchUsersByNickname(nickname: string) {
   try {
     return await db.models.User.aggregate([
       {
-        '$match': {
-          'nickname': {
-            '$regex': nickname, 
-            '$options': 'i'
-          }
-        }
-      }, {
-        '$lookup': {
-          'from': 'files', 
-          'localField': 'avatar', 
-          'foreignField': '_id', 
-          'as': 'avatar'
-        }
-      }, {
-        '$unwind': {
-          'path': '$avatar'
-        }
-      }, {
-        '$project': {
-          '_id': 0, 
-          'userId': '$_id', 
-          'nickname': 1, 
-          'avatar': '$avatar.filename'
-        }
-      }
+        $match: {
+          nickname: {
+            $regex: nickname,
+            $options: "i",
+          },
+        },
+      },
+      {
+        $lookup: {
+          from: "files",
+          localField: "avatar",
+          foreignField: "_id",
+          as: "avatar",
+        },
+      },
+      {
+        $unwind: {
+          path: "$avatar",
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          userId: "$_id",
+          nickname: 1,
+          avatar: "$avatar.filename",
+        },
+      },
     ]);
   } catch (error) {
     logger.silly("Error searching users by nickname", { error });
+    return null;
+  }
+}
+
+export function modifyUser(
+  userId: mongoose.Types.ObjectId,
+  data: Partial<Pick<IUser, "nickname" | "preferredGenres" | "avatar">>
+) {
+  try {
+    return db.models.User.findOneAndUpdate(
+      { _id: userId },
+      { $set: data },
+      { new: true }
+    );
+  } catch (error) {
+    logger.silly("Error modifying user", { error });
     return null;
   }
 }

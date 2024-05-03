@@ -4,6 +4,8 @@ API Route
 ## Request - HTTP Request
 ### Route: /users/search?text=""
 ### Method: `GET`
+### Headers
+- Authorization: Bearer `<token>`
 ### Query
 #### Properties
 - `text`

@@ -79,9 +79,7 @@ router.patch(
     if (!isOwner) {
       return res.status(403).send(responser.error([ErrorCode.FORBIDDEN]));
     }
-    let data = {
-      ...req.body,
-    } as EditBookDto;
+    let data = req.body as EditBookDto;
     if (req.body.exceptions) {
       data.exceptions = req.body.exceptions.split(",");
     }

@@ -9,3 +9,8 @@ export interface AuthBoardDto {
   nickname: string;
   preferredGenres: string[];
 }
+
+export interface AuthModifyDto {
+  nickname: string;
+  preferredGenres: string[];
+}

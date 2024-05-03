@@ -8,7 +8,7 @@ const router = express.Router();
 
 router.use(auth);
 
-router.get("/search", async (req, res) => {
+router.get("/search", auth, async (req, res) => {
   const text = req.query.text?.toString();
   if (!text) {
     return res.status(400).json(responser.error([ErrorCode.INVALID_QUERY]));

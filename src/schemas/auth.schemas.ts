@@ -34,7 +34,27 @@ export const boardedUserSchema = z.object({
   }),
 });
 
+const modifySchema = z.object({
+  nickname: z
+    .string({
+      message: ErrorCode.INVALID_NICKNAME,
+    })
+    .min(3, {
+      message: ErrorCode.INVALID_NICKNAME,
+    })
+    .max(20, {
+      message: ErrorCode.INVALID_NICKNAME,
+    })
+    .optional(),
+  preferredGenres: z
+    .string({
+      message: ErrorCode.INVALID_GENRE,
+    })
+    .optional(),
+});
+
 export default {
   login: loginSchema,
   board: boardedUserSchema,
+  modify: modifySchema,
 };
