@@ -13,7 +13,7 @@ const exchangeSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ["REQUESTED", "APPROVED", "DECLINED"],
+    enum: ["REQUESTED", "APPROVED", "ARCHIVED"],
     required: true,
   },
 });

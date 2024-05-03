@@ -21,3 +21,4 @@ Since the system is planned to rely on Google SSO for identity verification of t
 ## Routes
 - [/auth/login](login.md)
 - [/auth/board](board.md)
+- [/auth/modify](modify.md) (TODO)
