@@ -1,0 +1,6 @@
+export enum ExchangeStatus {
+  REQUESTED = "REQUESTED",
+  APPROVED = "APPROVED",
+  COMPLETED = "COMPLETED",
+  ARCHIVED = "ARCHIVED",
+}

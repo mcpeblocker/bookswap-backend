@@ -3,7 +3,7 @@
 ## Routes
 - [/books/upload](upload.md)
 - [/books/:bookId/edit](edit.md)
-- [/books/bookshelf/my](my-bookshelf.md) (TODO)
-- [/books/bookshelf/:userId](user-bookshelf.md) (TODO)
-- [/books/feed](feed.md) (TODO)
-- [/books/search](search.md) (TODO)
+- [/books/bookshelf/my](my-bookshelf.md)
+- [/books/bookshelf/:userId](user-bookshelf.md)
+- [/books/feed](feed.md)
+- [/books/search](search.md)

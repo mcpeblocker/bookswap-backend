@@ -1,4 +1,4 @@
 # Notifications API Group
 
 ## Routes
-- [/notifications/my](my-notifications.md) (TODO)
+- [/notifications/my](my-notifications.md)

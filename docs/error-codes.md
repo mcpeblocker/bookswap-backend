@@ -43,6 +43,9 @@ Below is the list of error codes used for specifying problem in HTTP responses.
   - Provided visilibity option is invalid, see the request body specification for more info
 - `INVALID_EXCEPTION`
   - Provided exception in the list is invalid, it should be a valid MongoDB ObjectID of the existing user
+#### Exchange Request schema
+- `INVALID_ID`
+  - Provided id is invalid
 
 ### S3 Upload
 - `FILE_UPLOAD_ERROR`

@@ -25,6 +25,8 @@ export enum ErrorCode {
   // INVALID_GENRE = "INVALID_GENRE", - Already defined
   INVALID_VISIBILITY = "INVALID_VISIBILITY",
   INVALID_EXCEPTION = "INVALID_EXCEPTION",
+  // [Exchanges] Request schema
+  INVALID_ID = "INVALID_ID",
 
   // S3 Upload
   FILE_UPLOAD_ERROR = "FILE_UPLOAD_ERROR",

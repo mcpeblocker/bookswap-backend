@@ -1,8 +1,11 @@
 import server from "../core/server";
 import logger from "../utils/logger";
 import authRouter from "./auth";
-import usersRouter from './users';
-import booksRouter from './books';
+import usersRouter from "./users";
+import booksRouter from "./books";
+import exchangesRouter from "./exchanges";
+import notificationsRouter from "./notifications";
+import router from "./auth";
 
 const routes = [
   {
@@ -11,12 +14,20 @@ const routes = [
   },
   {
     path: "/users",
-    router: usersRouter
+    router: usersRouter,
   },
   {
     path: "/books",
     router: booksRouter,
-  }
+  },
+  {
+    path: "/exchanges",
+    router: exchangesRouter,
+  },
+  {
+    path: "/notifications",
+    router: notificationsRouter,
+  },
 ];
 
 export function initializeRoutes() {

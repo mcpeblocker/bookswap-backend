@@ -50,6 +50,47 @@ export async function getUserByEmail(email: string) {
   }
 }
 
+export async function getUserById(userId: mongoose.Types.ObjectId) {
+  try {
+    const pipeline = [
+      {
+        $match: {
+          _id: userId,
+        },
+      },
+      {
+        $lookup: {
+          from: "files",
+          localField: "avatar",
+          foreignField: "_id",
+          as: "avatar",
+        },
+      },
+      {
+        $unwind: {
+          path: "$avatar",
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          userId: "$_id",
+          nickname: 1,
+          email: 1,
+          preferredGenres: 1,
+          avatar: "$avatar.filename",
+        },
+      },
+    ];
+    const results = await db.models.User.aggregate(pipeline);
+    if (!results[0]) return null;
+    return results[0];
+  } catch (error) {
+    logger.silly("Error getting user by id", { error });
+    return null;
+  }
+}
+
 export async function searchUsersByNickname(nickname: string) {
   try {
     return await db.models.User.aggregate([

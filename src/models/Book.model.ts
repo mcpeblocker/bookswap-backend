@@ -24,10 +24,12 @@ const bookSchema = new mongoose.Schema({
     enum: Visibility,
     required: true,
   },
-  exceptions: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "User",
-  }],
+  exceptions: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
+  ],
   owner: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
@@ -38,6 +40,15 @@ const bookSchema = new mongoose.Schema({
     enum: ["AVAILABLE", "RESERVED", "EXCHANGED"],
     required: true,
   },
+  createdAt: {
+    type: Date,
+    default: Date.now,
+  },
+});
+
+bookSchema.index({
+  title: "text",
+  author: "text",
 });
 
 export default mongoose.model("Book", bookSchema);

@@ -8,9 +8,10 @@ export interface IBook {
   title: string;
   author: string;
   genre: string;
-  cover: mongoose.Types.ObjectId | IFile;
+  cover: IFile | mongoose.Types.ObjectId;
   visibility: Visibility;
   exceptions: mongoose.Types.ObjectId[] | IUser[];
   owner: mongoose.Types.ObjectId | IUser;
   status: "AVAILABLE" | "RESERVED" | "EXCHANGED";
+  createdAt: Date;
 }

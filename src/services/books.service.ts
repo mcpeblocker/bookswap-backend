@@ -3,6 +3,7 @@ import { db } from "../core/database";
 import { BookStatus } from "../enums/BookStatus.enum";
 import { IBook } from "../interfaces/Book.interface";
 import logger from "../utils/logger";
+import { ExchangeStatus } from "../enums/ExchangeStatus.enum";
 
 export async function createBook(
   data: Pick<
@@ -64,6 +65,424 @@ export async function updateBook(
     );
   } catch (error) {
     logger.silly("Error updating book", { error });
+    return null;
+  }
+}
+
+export async function getBookById(
+  bookId: mongoose.Types.ObjectId
+): Promise<IBook | null> {
+  try {
+    return await db.models.Book.findById(bookId).populate("cover");
+  } catch (error) {
+    logger.silly("Error getting book", { error });
+    return null;
+  }
+}
+
+export async function searchBooks(text: string) {
+  try {
+    const pipeline = [
+      {
+        $match: {
+          $or: [
+            { title: { $regex: new RegExp(text, "ig") } },
+            { author: { $regex: new RegExp(text, "ig") } },
+          ],
+          // TODO: visibility
+        },
+      },
+      {
+        $lookup: {
+          from: "files",
+          localField: "cover",
+          foreignField: "_id",
+          as: "cover",
+        },
+      },
+      {
+        $unwind: {
+          path: "$cover",
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          bookId: "$_id",
+          title: 1,
+          author: 1,
+          genre: 1,
+          cover: "$cover.filename",
+          createdAt: 1,
+          status: 1,
+        },
+      },
+    ];
+    return await db.models.Book.aggregate(pipeline);
+  } catch (error) {
+    logger.silly("Error searching books", { error });
+    return null;
+  }
+}
+
+export async function getMyBookshelf(userId: mongoose.Types.ObjectId) {
+  try {
+    const pipeline = [
+      {
+        $match: {
+          owner: userId,
+        },
+      },
+      {
+        $lookup: {
+          from: "files",
+          localField: "cover",
+          foreignField: "_id",
+          as: "cover",
+        },
+      },
+      {
+        $unwind: {
+          path: "$cover",
+        },
+      },
+      {
+        $facet: {
+          available: [
+            {
+              $match: {
+                status: BookStatus.AVAILABLE,
+              },
+            },
+            {
+              $project: {
+                _id: 0,
+                bookId: "$_id",
+                title: 1,
+                author: 1,
+                genre: 1,
+                cover: "$cover.filename",
+                visibility: 1,
+                status: 1,
+                createdAt: 1,
+                exceptions: 1,
+              },
+            },
+          ],
+          reserved: [
+            {
+              $match: {
+                status: BookStatus.RESERVED,
+              },
+            },
+            {
+              $lookup: {
+                from: "exchanges",
+                localField: "_id",
+                foreignField: "offeredBook",
+                as: "exchange",
+              },
+            },
+            {
+              $unwind: {
+                path: "$exchange",
+              },
+            },
+            {
+              $match: {
+                "exchange.status": ExchangeStatus.APPROVED,
+              },
+            },
+            {
+              $lookup: {
+                from: "users",
+                localField: "exchange.requestedBy",
+                foreignField: "_id",
+                as: "exchange.requestedBy",
+              },
+            },
+            {
+              $unwind: {
+                path: "$exchange.requestedBy",
+              },
+            },
+            {
+              $lookup: {
+                from: "files",
+                localField: "exchange.requestedBy.avatar",
+                foreignField: "_id",
+                as: "exchange.requestedBy.avatar",
+              },
+            },
+            {
+              $unwind: {
+                path: "$exchange.requestedBy.avatar",
+              },
+            },
+            {
+              $lookup: {
+                from: "books",
+                localField: "exchange.exchangedBook",
+                foreignField: "_id",
+                as: "exchange.exchangedBook",
+              },
+            },
+            {
+              $unwind: {
+                path: "$exchange.exchangedBook",
+              },
+            },
+            {
+              $lookup: {
+                from: "files",
+                localField: "exchange.exchangedBook.cover",
+                foreignField: "_id",
+                as: "exchange.exchangedBook.cover",
+              },
+            },
+            {
+              $unwind: {
+                path: "$exchange.exchangedBook.cover",
+              },
+            },
+            {
+              $project: {
+                _id: 0,
+                bookId: "$_id",
+                title: 1,
+                author: 1,
+                genre: 1,
+                cover: "$cover.filename",
+                visibility: 1,
+                status: 1,
+                createdAt: 1,
+                exceptions: 1,
+                exchange: {
+                  exchangeId: "$exchange._id",
+                  approvedAt: "$exchange.approvedAt",
+                  requestedBy: {
+                    nickname: "$exchange.requestedBy.nickname",
+                    avatar: "$exchange.requestedBy.avatar.filename",
+                  },
+                  exchangedBook: {
+                    title: "$exchange.exchangedBook.title",
+                    author: "$exchange.exchangedBook.author",
+                    cover: "$exchange.exchangedBook.cover.filename",
+                  },
+                },
+              },
+            },
+          ],
+          exchanged: [
+            {
+              $match: {
+                status: BookStatus.EXCHANGED,
+              },
+            },
+            {
+              $lookup: {
+                from: "exchanges",
+                localField: "_id",
+                foreignField: "offeredBook",
+                as: "exchange",
+              },
+            },
+            {
+              $unwind: {
+                path: "$exchange",
+              },
+            },
+            {
+              $match: {
+                "exchange.status": ExchangeStatus.COMPLETED,
+              },
+            },
+            {
+              $lookup: {
+                from: "users",
+                localField: "exchange.requestedBy",
+                foreignField: "_id",
+                as: "exchange.requestedBy",
+              },
+            },
+            {
+              $unwind: {
+                path: "$exchange.requestedBy",
+              },
+            },
+            {
+              $lookup: {
+                from: "files",
+                localField: "exchange.requestedBy.avatar",
+                foreignField: "_id",
+                as: "exchange.requestedBy.avatar",
+              },
+            },
+            {
+              $unwind: {
+                path: "$exchange.requestedBy.avatar",
+              },
+            },
+            {
+              $lookup: {
+                from: "books",
+                localField: "exchange.exchangedBook",
+                foreignField: "_id",
+                as: "exchange.exchangedBook",
+              },
+            },
+            {
+              $unwind: {
+                path: "$exchange.exchangedBook",
+              },
+            },
+            {
+              $lookup: {
+                from: "files",
+                localField: "exchange.exchangedBook.cover",
+                foreignField: "_id",
+                as: "exchange.exchangedBook.cover",
+              },
+            },
+            {
+              $unwind: {
+                path: "$exchange.exchangedBook.cover",
+              },
+            },
+            {
+              $project: {
+                _id: 0,
+                bookId: "$_id",
+                title: 1,
+                author: 1,
+                genre: 1,
+                cover: "$cover.filename",
+                visibility: 1,
+                status: 1,
+                createdAt: 1,
+                exceptions: 1,
+                exchange: {
+                  exchangeId: "$exchange._id",
+                  approvedAt: "$exchange.approvedAt",
+                  exchangedAt: "$exchange.exchangedAt",
+                  requestedBy: {
+                    nickname: "$exchange.requestedBy.nickname",
+                    avatar: "$exchange.requestedBy.avatar.filename",
+                  },
+                  exchangedBook: {
+                    title: "$exchange.exchangedBook.title",
+                    author: "$exchange.exchangedBook.author",
+                    cover: "$exchange.exchangedBook.cover.filename",
+                  },
+                },
+              },
+            },
+          ],
+        },
+      },
+    ];
+    const result = await db.models.Book.aggregate(pipeline);
+    if (result.length === 0) {
+      return null;
+    }
+    return result[0];
+  } catch (error) {
+    logger.silly("Error getting bookshelf", { error });
+    return null;
+  }
+}
+
+export async function getUsersBookshelf(userId: mongoose.Types.ObjectId) {
+  try {
+    const pipeline = [
+      {
+        $match: {
+          owner: userId,
+          status: BookStatus.AVAILABLE,
+          // TODO: visibility
+        },
+      },
+      {
+        $lookup: {
+          from: "files",
+          localField: "cover",
+          foreignField: "_id",
+          as: "cover",
+        },
+      },
+      {
+        $unwind: {
+          path: "$cover",
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          bookId: "$_id",
+          title: 1,
+          author: 1,
+          genre: 1,
+          cover: "$cover.filename",
+          createdAt: 1,
+        },
+      },
+    ];
+    return { books: await db.models.Book.aggregate(pipeline) };
+  } catch (error) {
+    logger.silly("Error getting bookshelf", { error });
+    return null;
+  }
+}
+
+export async function getBooksForFeed(
+  userId: mongoose.Types.ObjectId,
+  size: number = 50
+) {
+  try {
+    // TODO: filter by visibility, personalize
+    const pipeline = [
+      {
+        $match: {
+          owner: {
+            $ne: userId,
+          },
+          status: "AVAILABLE",
+        },
+      },
+      {
+        $lookup: {
+          from: "files",
+          localField: "cover",
+          foreignField: "_id",
+          as: "cover",
+        },
+      },
+      {
+        $unwind: {
+          path: "$cover",
+        },
+      },
+      {
+        $sample: {
+          size,
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          bookId: "$_id",
+          title: 1,
+          author: 1,
+          genre: 1,
+          cover: "$cover.filename",
+          createdAt: 1,
+          status: 1,
+        },
+      },
+    ];
+    return await db.models.Book.aggregate(pipeline);
+  } catch (error) {
+    logger.silly("Error getting books for feed", { error });
     return null;
   }
 }

@@ -8,7 +8,11 @@ import { ErrorCode } from "../enums/ErrorCode.enum";
 import { EditBookDto, UploadBookDto } from "../dto";
 import {
   createBook,
+  getBooksForFeed,
+  getMyBookshelf,
+  getUsersBookshelf,
   isOwnerOfBook,
+  searchBooks,
   updateBook,
 } from "../services/books.service";
 import mongoose from "mongoose";
@@ -107,5 +111,57 @@ router.patch(
     return res.status(200).send(responser.success({ bookId: book._id }));
   }
 );
+
+router.get("/bookshelf/my", auth, async (req: AuthRequest, res) => {
+  if (!req.userId) {
+    return res.status(401).send(responser.error([ErrorCode.UNAUTHORIZED]));
+  }
+  const bookshelf = await getMyBookshelf(req.userId);
+  if (!bookshelf) {
+    return res.status(500).send(responser.error([ErrorCode.SERVER_ERROR]));
+  }
+  return res.status(200).json(responser.success(bookshelf));
+});
+
+router.get("/bookshelf/:userId", auth, async (req: AuthRequest, res) => {
+  if (!req.userId) {
+    return res.status(401).send(responser.error([ErrorCode.UNAUTHORIZED]));
+  }
+  if (!req.params.userId) {
+    return res.status(400).send(responser.error([ErrorCode.INVALID_ID]));
+  }
+  const userId = new mongoose.Types.ObjectId(req.params.userId);
+  const bookshelf = await getUsersBookshelf(userId);
+  if (!bookshelf) {
+    return res.status(500).send(responser.error([ErrorCode.SERVER_ERROR]));
+  }
+  return res.status(200).json(responser.success(bookshelf));
+});
+
+router.get("/search", auth, async (req: AuthRequest, res) => {
+  if (!req.userId) {
+    return res.status(401).send(responser.error([ErrorCode.UNAUTHORIZED]));
+  }
+  if (!req.query.text) {
+    return res.status(400).send(responser.error([ErrorCode.INVALID_QUERY]));
+  }
+  const text = req.query.text as string;
+  const books = await searchBooks(text);
+  if (!books) {
+    return res.status(500).send(responser.error([ErrorCode.SERVER_ERROR]));
+  }
+  return res.status(200).json(responser.success({ books }));
+});
+
+router.get("/feed", auth, async (req: AuthRequest, res) => {
+  if (!req.userId) {
+    return res.status(401).send(responser.error([ErrorCode.UNAUTHORIZED]));
+  }
+  const books = await getBooksForFeed(req.userId);
+  if (!books) {
+    return res.status(500).json(responser.error([ErrorCode.SERVER_ERROR]));
+  }
+  return res.status(200).json(responser.success({ books }));
+});
 
 export default router;

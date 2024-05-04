@@ -7,6 +7,7 @@ import {
   getUserByEmail,
   boardUser,
   modifyUser,
+  getUserById,
 } from "../services/users.service";
 import schemas from "../schemas";
 import { generateToken } from "../services/jwt.service";
@@ -15,6 +16,7 @@ import { AuthBoardDto, AuthLoginDto, AuthModifyDto } from "../dto";
 import { ErrorCode } from "../enums/ErrorCode.enum";
 import { auth } from "../middlewares/auth";
 import { AuthRequest } from "../interfaces/AuthRequest.interface";
+import { IFile } from "../interfaces/File.interface";
 
 const router = express.Router();
 
@@ -127,5 +129,16 @@ router.patch(
     return res.status(200).json(responser.success({ userId: user._id }));
   }
 );
+
+router.get("/me", auth, async (req: AuthRequest, res) => {
+  if (!req.userId) {
+    return res.status(401).send(responser.error([ErrorCode.UNAUTHORIZED]));
+  }
+  const user = await getUserById(req.userId);
+  if (!user) {
+    return res.status(500).send(responser.error([ErrorCode.SERVER_ERROR]));
+  }
+  return res.status(200).send(responser.success(user));
+});
 
 export default router;

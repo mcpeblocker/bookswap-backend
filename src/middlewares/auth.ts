@@ -29,7 +29,7 @@ export async function auth(
     if (!userId || !mongoose.Types.ObjectId.isValid(userId)) {
       return res.status(401).json(responser.error([ErrorCode.UNAUTHORIZED]));
     }
-    req.userId = userId;
+    req.userId = new mongoose.Types.ObjectId(userId as string);
     next();
   } catch (error) {
     return res.status(401).json(responser.error([ErrorCode.INVALID_TOKEN]));
