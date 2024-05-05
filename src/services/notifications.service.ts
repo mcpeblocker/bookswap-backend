@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import { db } from "../core/database";
 import { NotificationType } from "../enums/NotificationType.enum";
+import { io } from "../core/io";
 
 export async function getNotifications(userId: mongoose.Types.ObjectId) {
   const pipeline = [
@@ -111,13 +112,35 @@ export async function createNotification(
   exchangeId: mongoose.Types.ObjectId,
   type: NotificationType
 ) {
-  const notification = new db.models.Notification({
+  const book = await db.models.Book.findById(bookId).lean();
+  const actor = await db.models.User.findById(actorId).lean();
+  if (!book || !actor) {
+    return null;
+  }
+  const bookCover = await db.models.File.findById(book.cover);
+  const actorAvatar = await db.models.File.findById(actor.avatar);
+  let notification = new db.models.Notification({
     user: userId,
     book: bookId,
     actor: actorId,
     exchange: exchangeId,
     type,
   });
-  await notification.save();
+  notification = await notification.save();
+  io.to(userId.toString()).emit("notification", {
+    notificationId: notification._id,
+    type,
+    seen: notification.seen,
+    createdAt: notification.createdAt,
+    exchangeId: exchangeId.toString(),
+    book: {
+      bookId: bookId.toString(),
+      cover: bookCover?.filename,
+    },
+    actor: {
+      nickname: actor.nickname,
+      avatar: actorAvatar?.filename,
+    },
+  });
   return notification;
 }

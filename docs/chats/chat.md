@@ -106,32 +106,33 @@ API Route
 {
   "success": true,
   "data": {
-    "chats": [
+    "chat": {
+      "exchangeId": "66309f8691d019ed240c646f",
+      "offeredBook": {
+        "title": "Harry Potter",
+        "cover": "J. K. Rowling"
+      },
+      "offeredBy": {
+        "userId": "66309f8691d019ed240c646f",
+        "nickname": "genius",
+        "avatar": "123123-genius.jpg"
+      },
+      "exchangedBook": {
+        "title": "Justice",
+        "cover": "Someone"
+      },
+      "requestedBy": {
+        "userId": "66309f8691d019ed240c646f",
+        "nickname": "fool",
+        "avatar": "1231231-fool.jpg"
+      }
+    },
+    "messages": [
       {
-        "exchangeId": "66309f8691d019ed240c646f",
-        "offeredBook": {
-          "title": "Harry Potter",
-          "cover": "J. K. Rowling"
-        },
-        "offeredBy": {
-          "userId": "66309f8691d019ed240c646f",
-          "nickname": "genius",
-          "avatar": "123123-genius.jpg"
-        },
-        "exchangedBook": {
-          "title": "Justice",
-          "cover": "Someone"
-        },
-        "requestedBy": {
-          "userId": "66309f8691d019ed240c646f",
-          "nickname": "fool",
-          "avatar": "1231231-fool.jpg"
-        },
-        "latestMessage": {
-          "text": "Bye bye",
-          "createdAt": "2024-05-03T12:42:18.179+00:00",
-          "seen": false
-        }
+        "sender": "66309f8691d019ed240c646f",
+        "text": "Bye bye",
+        "createdAt": "2024-05-03T12:42:18.179+00:00",
+        "seen": false
       }
     ]
   }

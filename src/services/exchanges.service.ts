@@ -136,9 +136,9 @@ export async function completeExchange(
     await exchangedBook.save();
     await exchange.save();
     await createNotification(
-      exchangedBook.owner,
+      offeredBook.owner,
       exchange.offeredBook,
-      exchange.requestedBy,
+      exchangedBook.owner,
       exchange._id,
       NotificationType.EXCHANGE
     );

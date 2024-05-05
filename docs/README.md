@@ -8,8 +8,9 @@ It is designed to provide straightforward interface for the client instead of co
 ### - [Books](books)
 ### - [Users](users)
 ### - [Exchanges](exchanges)
-### - [Chats](chats)
 ### - [Notifications](notifications)
+### - [Chats](chats)
+### - [Websocket](websocket)
 
 ## Shared Constants
 ### - [Error Codes](error-codes.md)

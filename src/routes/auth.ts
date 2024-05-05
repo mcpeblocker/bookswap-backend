@@ -113,7 +113,6 @@ router.patch(
       const file = await createFile({
         filename,
       });
-      console.log(file);
       if (!file) {
         return res.status(500).send(responser.error([ErrorCode.SERVER_ERROR]));
       }

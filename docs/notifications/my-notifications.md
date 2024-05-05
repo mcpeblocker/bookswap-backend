@@ -38,11 +38,11 @@ API Route
         - properties:
           - `notificationId`:
             - type: string
-            - a valid ObjectID of the book
+            - a valid ObjectID of the notification
           - `type`:
             - type: string
             - a type of the action triggered notification
-            - can be _`MESSAGE`_, _`ARCHIVE`_, _`REQUEST`_, _`APPROVE`_, _`EXCHANGE`_
+            - can be _`ARCHIVE`_, _`REQUEST`_, _`APPROVE`_, _`EXCHANGE`_
           - `book`:
             - type: object
             - properties of the book

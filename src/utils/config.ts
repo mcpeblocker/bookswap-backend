@@ -10,6 +10,7 @@ const defaultConfig = {
 
 export const config = {
   port: Number(process.env["PORT"] || defaultConfig.port),
+  socketPort: Number(process.env["SOCKET_PORT"] || 8081),
   host: process.env["HOST"] || defaultConfig.host,
   databaseUri: process.env["DATABASE_URI"] || defaultConfig.databaseUri,
   s3Bucket: process.env["S3_BUCKET"] as string,
