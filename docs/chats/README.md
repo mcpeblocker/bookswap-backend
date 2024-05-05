@@ -1,5 +1,5 @@
 # Chats API Group
 
 ## Routes
-- [/chats](chats.md) (TODO)
-- [/chats/:exchangeId](chat.md) (TODO)
+- [/chats](chats.md)
+- [/chats/:exchangeId](chat.md)
