@@ -63,7 +63,7 @@ router.post(
     }
     const exchangeId = req.body.exchangeId as mongoose.Types.ObjectId;
     const bookId = req.body.bookId as mongoose.Types.ObjectId;
-    const exchange = await acceptExchange(exchangeId, bookId);
+    const exchange = await acceptExchange(exchangeId, bookId, req.userId);
     if (!exchange) {
       return res.status(500).send(responser.error([ErrorCode.SERVER_ERROR]));
     }
@@ -88,7 +88,7 @@ router.post(
     }
     return res.status(200).send(
       responser.success({
-        exchnageId: exchange._id,
+        exchangeId: exchange._id,
       })
     );
   }
@@ -116,6 +116,9 @@ router.get("/:bookId", auth, async (req: AuthRequest, res) => {
   const book = await getBookById(bookId);
   if (!book) {
     return res.status(400).send(responser.error([ErrorCode.INVALID_ID]));
+  }
+  if (book.owner.toString() !== req.userId.toString()) {
+    return res.status(403).send(responser.error([ErrorCode.FORBIDDEN]));
   }
   const exchanges = await getExchangesByBookId(book._id);
   if (!exchanges) {

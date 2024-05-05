@@ -17,7 +17,7 @@ export const uploadSchema = z.object({
   }),
   exceptions: z.string({
     message: ErrorCode.INVALID_EXCEPTION,
-  }),
+  }).optional(),
 });
 
 export const editSchema = z.object({

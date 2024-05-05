@@ -5,7 +5,7 @@ import usersRouter from "./users";
 import booksRouter from "./books";
 import exchangesRouter from "./exchanges";
 import notificationsRouter from "./notifications";
-import router from "./auth";
+import chatsRouter from "./chats";
 
 const routes = [
   {
@@ -27,6 +27,10 @@ const routes = [
   {
     path: "/notifications",
     router: notificationsRouter,
+  },
+  {
+    path: "/chats",
+    router: chatsRouter,
   },
 ];
 

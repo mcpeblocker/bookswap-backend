@@ -49,6 +49,9 @@ API Route
             - this refers to the book posted by owner when type is _REQUEST_, _MESSAGE_
             - this refers to the book user wanted to get when type is _ARCHIVE_, _APPROVE_
             - properties:
+              - `bookId`:
+                - type: string
+                - a valid ObjectID of the book
               - `cover`:
                 - type: string
                 - a valid file path for the cover of the book
@@ -82,34 +85,7 @@ API Route
       {
         "type": "ARCHIVE",
         "book": {
-          "cover": "1714531290907-delta.jpg"
-        },
-        "actor": {
-          "nickname": "genius",
-          "avatar": "1714462187265-delta.jpg"
-        },
-        "seen": false,
-        "createdAt": "2024-05-04T17:13:33.091Z",
-        "notificationId": "66366cbd87d37569de408b83",
-        "exchangeId": "66366cb287d37569de408b78"
-      },
-      {
-        "type": "ARCHIVE",
-        "book": {
-          "cover": "1714531290907-delta.jpg"
-        },
-        "actor": {
-          "nickname": "genius",
-          "avatar": "1714462187265-delta.jpg"
-        },
-        "seen": false,
-        "createdAt": "2024-05-04T17:13:33.089Z",
-        "notificationId": "66366cbd87d37569de408b81",
-        "exchangeId": "66366aca6e056ed36ce6cc72"
-      },
-      {
-        "type": "ARCHIVE",
-        "book": {
+          "bookId": "66366aca6e056ed36ce6cc72",
           "cover": "1714531290907-delta.jpg"
         },
         "actor": {

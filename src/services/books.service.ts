@@ -273,10 +273,10 @@ export async function getMyBookshelf(userId: mongoose.Types.ObjectId) {
               },
             },
           ],
-          exchanged: [
+          offered: [
             {
               $match: {
-                status: BookStatus.EXCHANGED,
+                status: "EXCHANGED",
               },
             },
             {
@@ -294,7 +294,7 @@ export async function getMyBookshelf(userId: mongoose.Types.ObjectId) {
             },
             {
               $match: {
-                "exchange.status": ExchangeStatus.COMPLETED,
+                "exchange.status": "COMPLETED",
               },
             },
             {
@@ -373,6 +373,111 @@ export async function getMyBookshelf(userId: mongoose.Types.ObjectId) {
                     title: "$exchange.exchangedBook.title",
                     author: "$exchange.exchangedBook.author",
                     cover: "$exchange.exchangedBook.cover.filename",
+                  },
+                },
+              },
+            },
+          ],
+          exchanged: [
+            {
+              $match: {
+                status: "EXCHANGED",
+              },
+            },
+            {
+              $lookup: {
+                from: "exchanges",
+                localField: "_id",
+                foreignField: "exchangedBook",
+                as: "exchange",
+              },
+            },
+            {
+              $unwind: {
+                path: "$exchange",
+              },
+            },
+            {
+              $match: {
+                "exchange.status": "COMPLETED",
+              },
+            },
+            {
+              $lookup: {
+                from: "books",
+                localField: "exchange.offeredBook",
+                foreignField: "_id",
+                as: "exchange.offeredBook",
+              },
+            },
+            {
+              $unwind: {
+                path: "$exchange.offeredBook",
+              },
+            },
+            {
+              $lookup: {
+                from: "users",
+                localField: "exchange.offeredBook.owner",
+                foreignField: "_id",
+                as: "exchange.offeredBook.owner",
+              },
+            },
+            {
+              $unwind: {
+                path: "$exchange.offeredBook.owner",
+              },
+            },
+            {
+              $lookup: {
+                from: "files",
+                localField: "exchange.offeredBook.owner.avatar",
+                foreignField: "_id",
+                as: "exchange.offeredBook.owner.avatar",
+              },
+            },
+            {
+              $unwind: {
+                path: "$exchange.offeredBook.owner.avatar",
+              },
+            },
+            {
+              $lookup: {
+                from: "files",
+                localField: "exchange.offeredBook.cover",
+                foreignField: "_id",
+                as: "exchange.offeredBook.cover",
+              },
+            },
+            {
+              $unwind: {
+                path: "$exchange.offeredBook.cover",
+              },
+            },
+            {
+              $project: {
+                _id: 0,
+                bookId: "$_id",
+                title: 1,
+                author: 1,
+                genre: 1,
+                cover: "$cover.filename",
+                visibility: 1,
+                status: 1,
+                createdAt: 1,
+                exceptions: 1,
+                exchange: {
+                  exchangeId: "$exchange._id",
+                  approvedAt: "$exchange.approvedAt",
+                  exchangedAt: "$exchange.exchangedAt",
+                  offeredBy: {
+                    nickname: "$exchange.offeredBook.owner.nickname",
+                    avatar: "$exchange.offeredBook.owner.avatar.filename",
+                  },
+                  offeredBook: {
+                    title: "$exchange.offeredBook.title",
+                    author: "$exchange.offeredBook.author",
+                    cover: "$exchange.offeredBook.cover.filename",
                   },
                 },
               },

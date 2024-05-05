@@ -83,6 +83,7 @@ export async function getNotifications(userId: mongoose.Types.ObjectId) {
         createdAt: 1,
         exchangeId: "$exchange._id",
         book: {
+          bookId: "$book._id",
           cover: "$book.cover.filename",
         },
         actor: {
@@ -92,9 +93,15 @@ export async function getNotifications(userId: mongoose.Types.ObjectId) {
       },
     },
   ];
-  return await db.models.Notification.aggregate(pipeline).sort({
+  const notifications = await db.models.Notification.aggregate(pipeline).sort({
     createdAt: -1,
   });
+  // Mark notifications as seen
+  await db.models.Notification.updateMany(
+    { user: userId, seen: false },
+    { $set: { seen: true } }
+  );
+  return notifications;
 }
 
 export async function createNotification(

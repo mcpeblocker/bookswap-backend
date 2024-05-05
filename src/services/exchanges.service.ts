@@ -37,23 +37,40 @@ export async function requestExchange(
 
 export async function acceptExchange(
   exchangeId: mongoose.Types.ObjectId,
-  bookId: mongoose.Types.ObjectId
+  bookId: mongoose.Types.ObjectId,
+  userId: mongoose.Types.ObjectId
 ) {
   try {
-    const book = await db.models.Book.findById(bookId);
-    if (!book) {
+    const exchangedBook = await db.models.Book.findById(bookId);
+    if (!exchangedBook) {
+      return null;
+    }
+    if (exchangedBook.status !== BookStatus.AVAILABLE) {
       return null;
     }
     const exchange = await db.models.Exchange.findById(exchangeId);
     if (!exchange) {
       return null;
     }
-    book.status = BookStatus.RESERVED;
+    if (exchange.status !== ExchangeStatus.REQUESTED) {
+      return null;
+    }
+    const offeredBook = await db.models.Book.findById(exchange.offeredBook);
+    if (!offeredBook) {
+      return null;
+    }
+    if (offeredBook.owner.toString() !== userId.toString()) {
+      return null;
+    }
+    if (offeredBook.status !== BookStatus.AVAILABLE) {
+      return null;
+    }
+    offeredBook.status = BookStatus.RESERVED;
     exchange.status = ExchangeStatus.APPROVED;
     exchange.exchangedBook = bookId;
     exchange.approvedAt = new Date();
-    // await book.save();
-    // await exchange.save();
+    await offeredBook.save();
+    await exchange.save();
     // mark other exchanges as archived
     const exchanges = await db.models.Exchange.find({
       offeredBook: exchange.offeredBook,
@@ -64,11 +81,11 @@ export async function acceptExchange(
     });
     for (let archivedExchange of exchanges) {
       archivedExchange.status = ExchangeStatus.ARCHIVED;
-      //   await archivedExchange.save();
+      await archivedExchange.save();
       await createNotification(
         archivedExchange.requestedBy,
         archivedExchange.offeredBook,
-        book.owner,
+        userId,
         archivedExchange._id,
         NotificationType.ARCHIVE
       );
@@ -76,7 +93,7 @@ export async function acceptExchange(
     await createNotification(
       exchange.requestedBy,
       exchange.offeredBook,
-      book.owner,
+      userId,
       exchange._id,
       NotificationType.APPROVE
     );
@@ -92,31 +109,36 @@ export async function completeExchange(
   userId: mongoose.Types.ObjectId
 ) {
   try {
-    const exchange = await db.models.Exchange.findById(exchangeId).populate(
-      "offeredBook"
-    );
+    const exchange = await db.models.Exchange.findById(exchangeId);
     if (!exchange) {
+      return null;
+    }
+    const offeredBook = await db.models.Book.findById(exchange.offeredBook);
+    if (!offeredBook) {
+      return null;
+    }
+    const exchangedBook = await db.models.Book.findById(exchange.exchangedBook);
+    if (!exchangedBook) {
       return null;
     }
     if (exchange.status !== ExchangeStatus.APPROVED) {
       return null;
     }
-    let notifiedUserId;
-    let otherUserId;
-    if (exchange.requestedBy === userId) {
-      notifiedUserId = (exchange.offeredBook as any).owner;
-      otherUserId = exchange.offeredBook;
-    } else if ((exchange.offeredBook as any).owner === userId) {
-      notifiedUserId = exchange.requestedBy;
-      otherUserId = (exchange.offeredBook as any).owner;
+    // Only the user who sent the request can complete exchange
+    if (exchange.requestedBy.toString() !== userId.toString()) {
+      return null;
     }
+    offeredBook.status = BookStatus.EXCHANGED;
+    exchangedBook.status = BookStatus.EXCHANGED;
     exchange.status = ExchangeStatus.COMPLETED;
     exchange.exchangedAt = new Date();
+    await offeredBook.save();
+    await exchangedBook.save();
     await exchange.save();
     await createNotification(
-      notifiedUserId,
+      exchangedBook.owner,
       exchange.offeredBook,
-      otherUserId,
+      exchange.requestedBy,
       exchange._id,
       NotificationType.EXCHANGE
     );

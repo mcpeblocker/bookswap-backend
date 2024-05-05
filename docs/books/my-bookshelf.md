@@ -83,17 +83,12 @@ API Route
         "cover": "1714811958232-delta.jpg"
       }
     ],
-    "exchanged": [
+    "offered": [
       {
         "title": "Me Before You",
         "author": "JoJo Moyes",
         "genre": "Novel",
         "visibility": "PUBLIC",
-        "exceptions": [
-          "60b4f0c4d9f7f8b7a0d3d1b4",
-          "60b4f0c4d9f7f8b7a0d3d1d4",
-          "60b4f0c4d9f7f8b7a0d3d1c4"
-        ],
         "status": "EXCHANGED",
         "createdAt": "2024-05-03T12:42:18.179Z",
         "exchange": {
@@ -102,6 +97,32 @@ API Route
             "avatar": "1714462607783-delta.jpg"
           },
           "exchangedBook": {
+            "title": "Me Before You",
+            "author": "JoJo Moyes",
+            "cover": "1714740136590-delta.jpg"
+          },
+          "exchangeId": "6634efb55c3aa14f5651a232",
+          "approvedAt": "2024-05-04T09:20:19.350Z",
+          "exchangedAt": "2024-05-04T09:20:19.350Z"
+        },
+        "bookId": "6634dbaaaf67fac193ebb5f8",
+        "cover": "1714740136590-delta.jpg"
+      }
+    ],
+    "exchanged": [
+      {
+        "title": "Harry Potter",
+        "author": "J. K. Rowling",
+        "genre": "Novel",
+        "visibility": "PUBLIC",
+        "status": "EXCHANGED",
+        "createdAt": "2024-05-03T12:42:18.179Z",
+        "exchange": {
+          "offeredBy": {
+            "nickname": "mcpeblocker",
+            "avatar": "1714462607783-delta.jpg"
+          },
+          "offeredBook": {
             "title": "Me Before You",
             "author": "JoJo Moyes",
             "cover": "1714740136590-delta.jpg"

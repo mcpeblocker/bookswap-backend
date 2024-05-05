@@ -91,7 +91,10 @@ export async function getUserById(userId: mongoose.Types.ObjectId) {
   }
 }
 
-export async function searchUsersByNickname(nickname: string) {
+export async function searchUsersByNickname(
+  nickname: string,
+  userId: mongoose.Types.ObjectId
+) {
   try {
     return await db.models.User.aggregate([
       {
@@ -100,6 +103,7 @@ export async function searchUsersByNickname(nickname: string) {
             $regex: nickname,
             $options: "i",
           },
+          _id: { $ne: userId },
         },
       },
       {

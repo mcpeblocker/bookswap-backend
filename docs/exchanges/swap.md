@@ -1,5 +1,7 @@
 # Complete exchange by swapping
 
+Only the user who requested the offered book in exchange can complete swapping
+
 API Route
 
 ## Request - HTTP Request
