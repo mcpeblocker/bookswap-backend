@@ -28,10 +28,11 @@ export async function boardUser(
   }
 }
 
-export async function createBoardingUser(email: string) {
+export async function createBoardingUser(email: string, name: string) {
   try {
     const newUser = new db.models.User({
       email,
+      name,
       onboarding: true,
     });
     return await newUser.save();
@@ -136,7 +137,7 @@ export async function searchUsersByNickname(
 
 export function modifyUser(
   userId: mongoose.Types.ObjectId,
-  data: Partial<Pick<IUser, "nickname" | "preferredGenres" | "avatar">>
+  data: Partial<Pick<IUser, "name" | "nickname" | "preferredGenres" | "avatar">>
 ) {
   try {
     return db.models.User.findOneAndUpdate(

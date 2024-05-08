@@ -2,9 +2,6 @@ import { z } from "zod";
 import { ErrorCode } from "../enums/ErrorCode.enum";
 
 export const loginSchema = z.object({
-  email: z
-    .string({ message: ErrorCode.INVALID_EMAIL })
-    .email({ message: ErrorCode.INVALID_EMAIL }),
   token: z.string({ message: ErrorCode.INVALID_TOKEN }),
 });
 
@@ -35,6 +32,11 @@ export const boardedUserSchema = z.object({
 });
 
 const modifySchema = z.object({
+  name: z
+    .string({
+      message: ErrorCode.INVALID_NICKNAME,
+    })
+    .optional(),
   nickname: z
     .string({
       message: ErrorCode.INVALID_NICKNAME,

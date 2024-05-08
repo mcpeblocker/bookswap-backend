@@ -1,6 +1,5 @@
 export interface AuthLoginDto {
-  email: string;
-  password: string;
+  token: string;
 }
 
 export interface AuthBoardDto {
@@ -11,6 +10,7 @@ export interface AuthBoardDto {
 }
 
 export interface AuthModifyDto {
+  name: string;
   nickname: string;
   preferredGenres: string[];
 }

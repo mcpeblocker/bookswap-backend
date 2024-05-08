@@ -6,6 +6,9 @@ const userSchema = new mongoose.Schema<IUser>({
     type: String,
     required: true,
   },
+  name: {
+    type: String,
+  },
   nickname: {
     type: String,
   },

@@ -16,20 +16,22 @@ import { AuthBoardDto, AuthLoginDto, AuthModifyDto } from "../dto";
 import { ErrorCode } from "../enums/ErrorCode.enum";
 import { auth } from "../middlewares/auth";
 import { AuthRequest } from "../interfaces/AuthRequest.interface";
-import { IFile } from "../interfaces/File.interface";
+import { verifyGoogleToken } from "../services/google-auth.service";
 
 const router = express.Router();
 
 router.post("/login", validator(schemas.auth.login), async (req, res) => {
   const loginData = req.body as AuthLoginDto;
   // Verify google auth credentials
-  // TODO: Implement Google auth verification
-
+  const result = await verifyGoogleToken(loginData.token);
+  if (!result) {
+    return res.status(400).json(responser.error([ErrorCode.INVALID_TOKEN]));
+  }
   // Check if user with email exists
-  const user = await getUserByEmail(loginData.email);
+  const user = await getUserByEmail(result.email);
   if (!user) {
     // create user
-    const newUser = await createBoardingUser(loginData.email);
+    const newUser = await createBoardingUser(result.email, result.name);
     if (!newUser) {
       return res.status(500).json(responser.error([ErrorCode.SERVER_ERROR]));
     }
