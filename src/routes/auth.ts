@@ -61,14 +61,19 @@ router.post(
       preferredGenres: req.body.preferredGenres.split(","),
     } as AuthBoardDto;
     // Validate request file
-    if (!req.file) {
-      return res.status(400).send(responser.error([ErrorCode.FILE_MISSING]));
-    }
-    const filename = await uploadToS3(req.file.originalname, req.file.buffer);
-    if (!filename) {
-      return res
-        .status(500)
-        .send(responser.error([ErrorCode.FILE_UPLOAD_ERROR]));
+    let filename;
+    if (req.file) {
+      filename = await uploadToS3(req.file.originalname, req.file.buffer);
+      if (!filename) {
+        return res
+          .status(500)
+          .send(responser.error([ErrorCode.FILE_UPLOAD_ERROR]));
+      }
+    } else {
+      if (!req.body.avatar) {
+        return res.status(400).send(responser.error([ErrorCode.FILE_MISSING]));
+      }
+      filename = req.body.avatar;
     }
     const file = await createFile({
       filename,
