@@ -6,6 +6,7 @@ import booksRouter from "./books";
 import exchangesRouter from "./exchanges";
 import notificationsRouter from "./notifications";
 import chatsRouter from "./chats";
+import files from "./files";
 
 const routes = [
   {
@@ -31,6 +32,10 @@ const routes = [
   {
     path: "/chats",
     router: chatsRouter,
+  },
+  {
+    path: "/files",
+    router: files,
   },
 ];
 
