@@ -11,6 +11,8 @@ It is designed to provide straightforward interface for the client instead of co
 ### - [Notifications](notifications)
 ### - [Chats](chats)
 ### - [Websocket](websocket)
+### - Files
+You can get the any file uploaded to backend using the route `/files/:filename` where `:filename` is the property of the file you're looking for.
 
 ## Shared Constants
 ### - [Error Codes](error-codes.md)
