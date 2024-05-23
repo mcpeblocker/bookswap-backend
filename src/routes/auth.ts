@@ -31,7 +31,7 @@ router.post("/login", validator(schemas.auth.login), async (req, res) => {
   const user = await getUserByEmail(result.email);
   if (!user) {
     // create user
-    const newUser = await createBoardingUser(result.email, result.name);
+    const newUser = await createBoardingUser(result.email);
     if (!newUser) {
       return res.status(500).json(responser.error([ErrorCode.SERVER_ERROR]));
     }
@@ -48,7 +48,17 @@ router.post("/login", validator(schemas.auth.login), async (req, res) => {
   const token = generateToken({
     userId: user._id,
   });
-  return res.status(200).json(responser.success({ boarding: false, token }));
+  return res.status(200).json(
+    responser.success({
+      boarding: false,
+      token,
+      user: {
+        userId: user._id,
+        nickname: user.nickname,
+        avatar: user.avatar,
+      },
+    })
+  );
 });
 
 router.post(
@@ -91,7 +101,16 @@ router.post(
     const token = generateToken({
       userId: user._id,
     });
-    return res.status(200).json(responser.success({ token }));
+    return res.status(200).json(
+      responser.success({
+        token,
+        user: {
+          userId: user._id,
+          nickname: userData.nickname,
+          avatar: filename,
+        },
+      })
+    );
   }
 );
 
