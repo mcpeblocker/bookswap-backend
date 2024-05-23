@@ -43,38 +43,15 @@ export async function createBoardingUser(email: string) {
 
 export async function getUserByEmail(email: string) {
   try {
-    const user = await db.models.User.aggregate([
-      {
-        $match: {
-          email,
-        },
-      },
-      {
-        $lookup: {
-          from: "files",
-          localField: "avatar",
-          foreignField: "_id",
-          as: "avatar",
-        },
-      },
-      {
-        $unwind: {
-          path: "$avatar",
-        },
-      },
-      {
-        $project: {
-          onboarding: 1,
-          _id: 1,
-          nickname: 1,
-          email: 1,
-          preferredGenres: 1,
-          avatar: "$avatar.filename",
-        },
-      },
-    ]);
-    if (!user[0]) return null;
-    return user[0];
+    const user = await db.models.User.findOne({ email });
+    if (!user) return null;
+    if (user.onboarding) return user;
+    const avatar = await db.models.File.findById(user.avatar);
+    if (!avatar) return null;
+    return {
+      ...user.toObject(),
+      avatar: avatar.filename,
+    };
   } catch (error) {
     logger.silly("Error getting user by email", { error });
     return null;
