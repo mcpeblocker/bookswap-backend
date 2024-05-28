@@ -66,10 +66,12 @@ export async function acceptExchange(
       return null;
     }
     offeredBook.status = BookStatus.RESERVED;
+    exchangedBook.status = BookStatus.RESERVED;
     exchange.status = ExchangeStatus.APPROVED;
     exchange.exchangedBook = bookId;
     exchange.approvedAt = new Date();
     await offeredBook.save();
+    await exchangedBook.save();
     await exchange.save();
     // mark other exchanges as archived
     const exchanges = await db.models.Exchange.find({

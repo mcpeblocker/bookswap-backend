@@ -69,6 +69,15 @@ export async function updateBook(
   }
 }
 
+export async function deleteBook(bookId: mongoose.Types.ObjectId) {
+  try {
+    return await db.models.Book.findByIdAndDelete(bookId);
+  } catch (error) {
+    logger.silly("Error deleting book", { error });
+    return null;
+  }
+}
+
 export async function getBookById(
   bookId: mongoose.Types.ObjectId
 ): Promise<IBook | null> {

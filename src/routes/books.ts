@@ -8,6 +8,8 @@ import { ErrorCode } from "../enums/ErrorCode.enum";
 import { EditBookDto, UploadBookDto } from "../dto";
 import {
   createBook,
+  deleteBook,
+  getBookById,
   getBooksForFeed,
   getMyBookshelf,
   getUsersBookshelf,
@@ -15,9 +17,11 @@ import {
   searchBooks,
   updateBook,
 } from "../services/books.service";
-import mongoose from "mongoose";
+import mongoose, { ObjectId } from "mongoose";
 import { auth } from "../middlewares/auth";
 import { AuthRequest } from "../interfaces/AuthRequest.interface";
+import { IFile } from "../interfaces/File.interface";
+import { getUserById } from "../services/users.service";
 
 const router = express.Router();
 
@@ -112,6 +116,26 @@ router.patch(
   }
 );
 
+router.delete("/:id/delete", async (req: AuthRequest, res) => {
+  if (!req.userId) {
+    return res.status(401).send(responser.error([ErrorCode.UNAUTHORIZED]));
+  }
+  const bookId = new mongoose.Types.ObjectId(req.params.id);
+  // Check if user is owner of the book
+  const isOwner = await isOwnerOfBook(
+    bookId,
+    new mongoose.Types.ObjectId(req.userId)
+  );
+  if (!isOwner) {
+    return res.status(403).send(responser.error([ErrorCode.FORBIDDEN]));
+  }
+  const deleted = await deleteBook(bookId);
+  if (!deleted) {
+    return res.status(500).send(responser.error([ErrorCode.SERVER_ERROR]));
+  }
+  return res.status(200).send(responser.success({ bookId }));
+});
+
 router.get("/bookshelf/my", auth, async (req: AuthRequest, res) => {
   if (!req.userId) {
     return res.status(401).send(responser.error([ErrorCode.UNAUTHORIZED]));
@@ -162,6 +186,37 @@ router.get("/feed", auth, async (req: AuthRequest, res) => {
     return res.status(500).json(responser.error([ErrorCode.SERVER_ERROR]));
   }
   return res.status(200).json(responser.success({ books }));
+});
+
+router.get("/:id", async (req: AuthRequest, res) => {
+  if (!req.userId) {
+    return res.status(401).send(responser.error([ErrorCode.UNAUTHORIZED]));
+  }
+  if (!req.params.id) {
+    return res.status(400).send(responser.error([ErrorCode.INVALID_ID]));
+  }
+  const bookId = new mongoose.Types.ObjectId(req.params.id);
+  let book = (await getBookById(bookId)) as any;
+  if (!book) {
+    return res.status(404).send(responser.error([ErrorCode.SERVER_ERROR]));
+  }
+  const exceptions = [];
+  for (let e of book.exceptions) {
+    const userId = e as mongoose.Types.ObjectId;
+    const user = await getUserById(userId);
+    exceptions.push({
+      userId,
+      nickname: user.nickname,
+      avatar: user.avatar,
+    });
+  }
+
+  book = { ...book.toObject(), exceptions };
+  return res.status(200).json(
+    responser.success({
+      book,
+    })
+  );
 });
 
 export default router;
