@@ -89,7 +89,11 @@ router.patch(
     }
     let data = req.body as EditBookDto;
     if (req.body.exceptions) {
-      data.exceptions = req.body.exceptions.split(",");
+      if (req.body.exceptions === "empty") {
+        data.exceptions = [];
+      } else {
+        data.exceptions = req.body.exceptions.split(",");
+      }
     }
     let cover;
     if (req.file) {
