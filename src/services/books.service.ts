@@ -89,7 +89,10 @@ export async function getBookById(
   }
 }
 
-export async function searchBooks(text: string) {
+export async function searchBooks(
+  text: string,
+  userId: mongoose.Types.ObjectId
+) {
   try {
     const pipeline = [
       {
@@ -98,7 +101,33 @@ export async function searchBooks(text: string) {
             { title: { $regex: new RegExp(text, "ig") } },
             { author: { $regex: new RegExp(text, "ig") } },
           ],
-          // TODO: visibility
+        },
+      },
+      {
+        $lookup: {
+          from: "users",
+          localField: "exceptions",
+          foreignField: "_id",
+          as: "exceptions",
+        },
+      },
+      {
+        $match: {
+          $or: [
+            {
+              visibility: "PUBLIC",
+            },
+            {
+              visibility: "EXCEPTIONAL_PUBLIC",
+              "exceptions._id": {
+                $ne: userId,
+              },
+            },
+            {
+              visibility: "EXCEPTIONAL_PRIVATE",
+              "exceptions._id": userId,
+            },
+          ],
         },
       },
       {
@@ -513,7 +542,33 @@ export async function getUsersBookshelf(userId: mongoose.Types.ObjectId) {
         $match: {
           owner: userId,
           status: BookStatus.AVAILABLE,
-          // TODO: visibility
+        },
+      },
+      {
+        $lookup: {
+          from: "users",
+          localField: "exceptions",
+          foreignField: "_id",
+          as: "exceptions",
+        },
+      },
+      {
+        $match: {
+          $or: [
+            {
+              visibility: "PUBLIC",
+            },
+            {
+              visibility: "EXCEPTIONAL_PUBLIC",
+              "exceptions._id": {
+                $ne: userId,
+              },
+            },
+            {
+              visibility: "EXCEPTIONAL_PRIVATE",
+              "exceptions._id": userId,
+            },
+          ],
         },
       },
       {
@@ -553,7 +608,6 @@ export async function getBooksForFeed(
   size: number = 50
 ) {
   try {
-    // TODO: filter by visibility, personalize
     const pipeline = [
       {
         $match: {
@@ -561,6 +615,33 @@ export async function getBooksForFeed(
             $ne: userId,
           },
           status: "AVAILABLE",
+        },
+      },
+      {
+        $lookup: {
+          from: "users",
+          localField: "exceptions",
+          foreignField: "_id",
+          as: "exceptions",
+        },
+      },
+      {
+        $match: {
+          $or: [
+            {
+              visibility: "PUBLIC",
+            },
+            {
+              visibility: "EXCEPTIONAL_PUBLIC",
+              "exceptions._id": {
+                $ne: userId,
+              },
+            },
+            {
+              visibility: "EXCEPTIONAL_PRIVATE",
+              "exceptions._id": userId,
+            },
+          ],
         },
       },
       {

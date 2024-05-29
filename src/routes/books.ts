@@ -174,7 +174,7 @@ router.get("/search", auth, async (req: AuthRequest, res) => {
     return res.status(400).send(responser.error([ErrorCode.INVALID_QUERY]));
   }
   const text = req.query.text as string;
-  const books = await searchBooks(text);
+  const books = await searchBooks(text, req.userId);
   if (!books) {
     return res.status(500).send(responser.error([ErrorCode.SERVER_ERROR]));
   }
