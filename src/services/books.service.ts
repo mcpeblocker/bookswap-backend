@@ -144,6 +144,14 @@ export async function searchBooks(
         },
       },
       {
+        $lookup: {
+          from: "exchanges",
+          localField: "_id",
+          foreignField: "offeredBook",
+          as: "exchanges",
+        },
+      },
+      {
         $project: {
           _id: 0,
           bookId: "$_id",
@@ -153,6 +161,22 @@ export async function searchBooks(
           cover: "$cover.filename",
           createdAt: 1,
           status: 1,
+          exchangeId: {
+            $getField: {
+              field: "_id",
+              input: {
+                $first: {
+                  $filter: {
+                    input: "$exchanges",
+                    as: "exchange",
+                    cond: {
+                      $eq: ["$$exchange.requestedBy", userId],
+                    },
+                  },
+                },
+              },
+            },
+          },
         },
       },
     ];
@@ -645,6 +669,11 @@ export async function getBooksForFeed(
         },
       },
       {
+        $sample: {
+          size,
+        },
+      },
+      {
         $lookup: {
           from: "files",
           localField: "cover",
@@ -658,8 +687,11 @@ export async function getBooksForFeed(
         },
       },
       {
-        $sample: {
-          size,
+        $lookup: {
+          from: "exchanges",
+          localField: "_id",
+          foreignField: "offeredBook",
+          as: "exchanges",
         },
       },
       {
@@ -672,6 +704,22 @@ export async function getBooksForFeed(
           cover: "$cover.filename",
           createdAt: 1,
           status: 1,
+          exchangeId: {
+            $getField: {
+              field: "_id",
+              input: {
+                $first: {
+                  $filter: {
+                    input: "$exchanges",
+                    as: "exchange",
+                    cond: {
+                      $eq: ["$$exchange.requestedBy", userId],
+                    },
+                  },
+                },
+              },
+            },
+          },
         },
       },
     ];
