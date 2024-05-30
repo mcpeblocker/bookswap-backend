@@ -358,6 +358,14 @@ export async function getChatByExchangeId(
     if (!result[0]) {
       return null;
     }
+    await db.models.Message.updateMany(
+      {
+        exchange: exchangeId,
+        sender: { $ne: userId },
+        seen: false,
+      },
+      { $set: { seen: true } }
+    );
     return result[0];
   } catch (error) {
     logger.silly("Error getting chat by exchange id", { error });
