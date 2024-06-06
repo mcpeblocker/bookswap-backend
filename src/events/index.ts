@@ -5,8 +5,13 @@ import { config } from "../utils/config";
 import logger from "../utils/logger";
 import onMessage from "./message";
 import { getChatsByUserId } from "../services/chats.service";
+import { Socket } from "socket.io";
 
 const authError = new Error("Unauthorized");
+
+const sockets = new Map();
+
+export const getSocket = (userId: string): Socket => sockets.get(userId);
 
 export function initializeEvents() {
   io.on("connection", async (socket) => {
@@ -25,6 +30,7 @@ export function initializeEvents() {
       }
       const userId = new mongoose.Types.ObjectId(data.userId as string);
       // const userId = new mongoose.Types.ObjectId("6636fecc60d2dcedfac82061");
+      sockets.set(userId.toString(), socket);
       socket.join(userId.toString());
       const chats = await getChatsByUserId(userId);
       if (chats) {
@@ -35,6 +41,7 @@ export function initializeEvents() {
       socket.on("message", (message) => onMessage(socket, userId, message));
       socket.on("disconnect", () => {
         logger.silly("User disconnected");
+        sockets.delete(userId.toString());
       });
     } catch (error) {
       logger.silly("Unauthorized user", { error });

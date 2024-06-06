@@ -5,6 +5,7 @@ import { ExchangeStatus } from "../enums/ExchangeStatus.enum";
 import { BookStatus } from "../enums/BookStatus.enum";
 import { createNotification } from "./notifications.service";
 import { NotificationType } from "../enums/NotificationType.enum";
+import { getSocket } from "../events";
 
 export async function requestExchange(
   userId: mongoose.Types.ObjectId,
@@ -99,6 +100,18 @@ export async function acceptExchange(
       exchange._id,
       NotificationType.APPROVE
     );
+    const userSockets = [];
+    const requestedUserSocket = getSocket(exchange.requestedBy.toString());
+    if (requestedUserSocket) {
+      userSockets.push(requestedUserSocket);
+    }
+    const offeredUserSocket = getSocket(userId.toString());
+    if (offeredUserSocket) {
+      userSockets.push(offeredUserSocket);
+    }
+    for (let socket of userSockets) {
+      socket.join(exchange._id.toString());
+    }
     return exchange;
   } catch (error) {
     logger.silly("Error accepting exchange", { error });
